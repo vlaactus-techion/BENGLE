@@ -23,9 +23,6 @@ th,td{border:1px solid #ddd;padding:8px;text-align:left}
 th{background:#0b6b3a;color:#fff}
 td.angka,th.angka{text-align:right}
 .catatan{font-size:13px;color:#666;margin:8px 0 0}
-label{display:block;margin:12px 0 4px;font-weight:bold;font-size:14px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:16px;font-family:inherit;box-sizing:border-box}
-textarea{min-height:100px}
 footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
 .scroll{overflow:auto;max-height:70vh;-webkit-overflow-scrolling:touch}
 table.iuran{min-width:760px;font-size:13px}
@@ -35,10 +32,6 @@ table.iuran th:first-child{background:#0b6b3a;z-index:3}
 table.iuran th{position:sticky;top:0;z-index:2}
 .ok{color:#0b6b3a;font-weight:bold;font-size:16px}
 .belum{color:#c0392b;font-size:16px}
-.bulan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.bulan-grid label{display:flex;align-items:center;gap:6px;margin:0;font-weight:normal;padding:8px;border:1px solid #ccc;border-radius:6px}
-.bulan-grid input{width:auto;margin:0}
-#blok-bayar{display:none}
 </style>
 </head>
 <body>
@@ -52,11 +45,10 @@ table.iuran th{position:sticky;top:0;z-index:2}
 
 <div class="card">
 <h2>Selamat datang, warga</h2>
-<p>Halaman ini untuk melihat laporan kas, membayar iuran, dan menyampaikan laporan atau saran ke pengurus.</p>
+<p>Halaman ini untuk melihat laporan kas, status iuran, dan membayar iuran.</p>
 <a class="btn btn-blue" href="#kas">Lihat laporan kas</a>
 <a class="btn btn-blue" href="#status">Cek status iuran bulanan</a>
 <a class="btn btn-blue" href="#bayar">Bayar iuran lewat QRIS</a>
-<a class="btn btn-blue" href="#lapor">Kirim laporan atau konfirmasi</a>
 </div>
 
 <div class="card" id="kas">
@@ -83,30 +75,112 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <p><b>Scan dengan aplikasi bank atau e-wallet</b><br>Setelah membayar, isi form konfirmasi pembayaran.</p>
 <a class="btn btn-blue" id="btn-gform" href="#" target="_blank" rel="noopener" style="display:none">Isi form konfirmasi pembayaran</a>
 </div>
+</div>
 
 <footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
 
 </div>
 
 <script>
-var EMAIL_PENGURUS = ["mayasalsabila17@gmail.com", "anung@bengle.dpdns.org"];
+// ===== DATA IURAN BULANAN =====
+// 50 baris warga. GANTI "Warga 1" dst dengan nama asli, dan isi "bayar" dengan nomor bulan yang sudah lunas (1=Jan ... 12=Des).
+var TAHUN = 2026;
+var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+var IURAN = 50000; // iuran per warga per bulan (Rp)
+var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
+var WARGA = [
+  {nama: "Warga 1", bayar: []},
+  {nama: "Warga 2", bayar: []},
+  {nama: "Warga 3", bayar: []},
+  {nama: "Warga 4", bayar: []},
+  {nama: "Warga 5", bayar: []},
+  {nama: "Warga 6", bayar: []},
+  {nama: "Warga 7", bayar: []},
+  {nama: "Warga 8", bayar: []},
+  {nama: "Warga 9", bayar: []},
+  {nama: "Warga 10", bayar: []},
+  {nama: "Warga 11", bayar: []},
+  {nama: "Warga 12", bayar: []},
+  {nama: "Warga 13", bayar: []},
+  {nama: "Warga 14", bayar: []},
+  {nama: "Warga 15", bayar: []},
+  {nama: "Warga 16", bayar: []},
+  {nama: "Warga 17", bayar: []},
+  {nama: "Warga 18", bayar: []},
+  {nama: "Warga 19", bayar: []},
+  {nama: "Warga 20", bayar: []},
+  {nama: "Warga 21", bayar: []},
+  {nama: "Warga 22", bayar: []},
+  {nama: "Warga 23", bayar: []},
+  {nama: "Warga 24", bayar: []},
+  {nama: "Warga 25", bayar: []},
+  {nama: "Warga 26", bayar: []},
+  {nama: "Warga 27", bayar: []},
+  {nama: "Warga 28", bayar: []},
+  {nama: "Warga 29", bayar: []},
+  {nama: "Warga 30", bayar: []},
+  {nama: "Warga 31", bayar: []},
+  {nama: "Warga 32", bayar: []},
+  {nama: "Warga 33", bayar: []},
+  {nama: "Warga 34", bayar: []},
+  {nama: "Warga 35", bayar: []},
+  {nama: "Warga 36", bayar: []},
+  {nama: "Warga 37", bayar: []},
+  {nama: "Warga 38", bayar: []},
+  {nama: "Warga 39", bayar: []},
+  {nama: "Warga 40", bayar: []},
+  {nama: "Warga 41", bayar: []},
+  {nama: "Warga 42", bayar: []},
+  {nama: "Warga 43", bayar: []},
+  {nama: "Warga 44", bayar: []},
+  {nama: "Warga 45", bayar: []},
+  {nama: "Warga 46", bayar: []},
+  {nama: "Warga 47", bayar: []},
+  {nama: "Warga 48", bayar: []},
+  {nama: "Warga 49", bayar: []},
+  {nama: "Warga 50", bayar: []}
+];
 
-var formWarga = document.getElementById("form-warga");
-var blokBayar = document.getElementById("blok-bayar");
+(function () {
+  var t = document.getElementById("tabel-iuran");
+  var h = "<tr><th>Nama</th>";
+  BULAN.forEach(function (b) { h += "<th>" + b + "</th>"; });
+  h += "</tr>";
+  WARGA.forEach(function (w) {
+    h += "<tr><td>" + w.nama + "</td>";
+    for (var i = 1; i <= 12; i++) {
+      h += w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>';
+    }
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+})();
 
-function aturForm() {
-  var konfirmasi = formWarga.jenis.value === "Konfirmasi pembayaran iuran";
-  blokBayar.style.display = konfirmasi ? "block" : "none";
-  formWarga.nominal.required = konfirmasi;
-  formWarga.pesan.required = !konfirmasi;
-}
-formWarga.jenis.addEventListener("change", aturForm);
-aturForm();
+(function () {
+  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
+  var h = '<tr><th>Bulan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>';
+  var saldo = 0;
+  for (var i = 1; i <= 12; i++) {
+    var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
+    var masuk = jumlah * IURAN;
+    var keluar = KELUAR[i - 1] || 0;
+    saldo += masuk - keluar;
+    h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
+         "</td><td class=\"angka\">" + rp(keluar) + "</td><td class=\"angka\">" + rp(saldo) + "</td></tr>";
+  }
+  document.getElementById("tabel-kas").innerHTML = h;
+})();
 
-formWarga.addEventListener("submit", function (e) {
-  e.preventDefault();
-  var f = e.target;
-  var konfirmasi = f.jenis.value === "Konfirmasi pembayaran iuran";
+// Tempel link Google Form di antara tanda kutip. Kalau kosong, tombol disembunyikan.
+var GFORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSds4PLeb_FeW4tgsCmpqu6o68jai5PxPZziY_D1Vlh5wpxX8w/viewform";
+(function () {
+  var b = document.getElementById("btn-gform");
+  if (GFORM_URL) { b.href = GFORM_URL; b.style.display = "block"; }
+})();
+</script>
+</body>
+</html>
+
   var bulanDipilih = Array.prototype.slice.call(f.querySelectorAll('input[name="bulan"]:checked')).map(function (c) { return c.value; });
   if (konfirmasi && bulanDipilih.length === 0) {
     alert("Pilih minimal satu bulan yang dibayar.");
