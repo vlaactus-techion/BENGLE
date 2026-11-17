@@ -23,6 +23,20 @@ th,td{border:1px solid #ddd;padding:8px;text-align:left}
 th{background:#0b6b3a;color:#fff}
 td.angka,th.angka{text-align:right}
 .catatan{font-size:13px;color:#666;margin:8px 0 0}
+.tabs{display:flex;gap:6px;margin:0 0 12px}
+.tab-btn{flex:1;padding:10px;border:2px solid #0b6b3a;background:#fff;color:#0b6b3a;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer}
+.tab-btn[aria-selected="true"]{background:#0b6b3a;color:#fff}
+.tab-btn:focus-visible{outline:3px solid #f5b301;outline-offset:2px}
+.panel[hidden]{display:none}
+.kosong-info{padding:20px 10px;text-align:center;color:#666;border:2px dashed #ccc;border-radius:8px;font-size:14px}
+.bukti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bukti-item{border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fafafa}
+.bukti-item a{display:block}
+.bukti-item img{width:100%;height:130px;object-fit:cover;display:block;background:#eee}
+.bukti-item .tanpa{height:130px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;background:#f0f0f0}
+.bukti-item .cap{padding:8px;font-size:13px}
+.bukti-item .cap b{display:block;color:#0b6b3a}
+tr.total td{font-weight:bold;background:#eef5f0}
 footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
 .scroll{overflow:auto;max-height:70vh;-webkit-overflow-scrolling:touch}
 table.iuran{min-width:760px;font-size:13px}
@@ -46,7 +60,8 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <div class="card">
 <h2>Selamat datang, warga</h2>
 <p>Halaman ini untuk melihat laporan kas, status iuran, dan membayar iuran.</p>
-<a class="btn btn-blue" href="#kas">Lihat laporan kas</a>
+
+<a class="btn btn-blue" href="#pengeluaran">Lihat laporan pengeluaran</a>
 <a class="btn btn-blue" href="#status">Cek status iuran bulanan</a>
 <a class="btn btn-blue" href="#bayar">Bayar iuran lewat QRIS</a>
 </div>
@@ -55,6 +70,22 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <h2>Laporan kas</h2>
 <table id="tabel-kas"></table>
 <p class="catatan">Pemasukan dihitung otomatis dari warga yang sudah bayar di tabel status iuran.</p>
+</div>
+
+<div class="card" id="pengeluaran">
+<h2>Laporan pengeluaran</h2>
+<div class="tabs" role="tablist">
+<button class="tab-btn" role="tab" id="tab-daftar" aria-controls="panel-daftar" aria-selected="true" data-tab="daftar">Daftar pengeluaran</button>
+<button class="tab-btn" role="tab" id="tab-bukti" aria-controls="panel-bukti" aria-selected="false" data-tab="bukti">Bukti pengeluaran</button>
+</div>
+<div class="panel" id="panel-daftar" role="tabpanel" aria-labelledby="tab-daftar">
+<div class="scroll"><table id="tabel-pengeluaran"></table></div>
+<p class="catatan">Total pengeluaran otomatis masuk ke kolom "Keluar" di laporan kas.</p>
+</div>
+<div class="panel" id="panel-bukti" role="tabpanel" aria-labelledby="tab-bukti" hidden>
+<div class="bukti-grid" id="grid-bukti"></div>
+<p class="catatan">Ketuk gambar untuk memperbesar.</p>
+</div>
 </div>
 
 <div class="card" id="status">
@@ -88,6 +119,11 @@ var TAHUN = 2026;
 var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
 var IURAN = 50000; // iuran per warga per bulan (Rp)
 var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
+// ===== DATA PENGELUARAN =====
+// Tambah satu baris per pengeluaran. tanggal format "TTTT-BB-HH". bukti = nama file foto/nota (mis. "bukti/nota-1.jpg") atau link gambar; kosongkan jika belum ada.
+var PENGELUARAN = [
+  // {tanggal: "2026-11-05", ket: "Gaji petugas kebersihan", jumlah: 300000, bukti: "bukti/nota-1.jpg"},
+];
 var WARGA = [
   {nama: "Warga 1", bayar: []},
   {nama: "Warga 2", bayar: []},
@@ -163,12 +199,57 @@ var WARGA = [
   for (var i = 1; i <= 12; i++) {
     var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
     var masuk = jumlah * IURAN;
-    var keluar = KELUAR[i - 1] || 0;
+    var keluar = (KELUAR[i - 1] || 0) + PENGELUARAN.reduce(function (a, p) { return parseInt(p.tanggal.slice(5, 7), 10) === i ? a + p.jumlah : a; }, 0);
     saldo += masuk - keluar;
     h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
          "</td><td class=\"angka\">" + rp(keluar) + "</td><td class=\"angka\">" + rp(saldo) + "</td></tr>";
   }
   document.getElementById("tabel-kas").innerHTML = h;
+})();
+
+(function () {
+  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
+  function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]; }); }
+  function tgl(x) { var q = x.split("-"); return parseInt(q[2], 10) + " " + BULAN[parseInt(q[1], 10) - 1] + " " + q[0]; }
+  var data = PENGELUARAN.slice().sort(function (a, b) { return a.tanggal < b.tanggal ? -1 : 1; });
+
+  var t = document.getElementById("tabel-pengeluaran");
+  if (!data.length) {
+    t.outerHTML = '<div class="kosong-info">Belum ada pengeluaran tercatat.</div>';
+  } else {
+    var total = 0;
+    var h = '<tr><th>Tanggal</th><th>Keterangan</th><th class="angka">Jumlah</th></tr>';
+    data.forEach(function (p) {
+      total += p.jumlah;
+      h += "<tr><td>" + esc(tgl(p.tanggal)) + "</td><td>" + esc(p.ket) + '</td><td class="angka">' + rp(p.jumlah) + "</td></tr>";
+    });
+    h += '<tr class="total"><td colspan="2">Total</td><td class="angka">' + rp(total) + "</td></tr>";
+    t.innerHTML = h;
+  }
+
+  var g = document.getElementById("grid-bukti");
+  if (!data.length) {
+    g.outerHTML = '<div class="kosong-info">Belum ada bukti pengeluaran.</div>';
+  } else {
+    g.innerHTML = data.map(function (p) {
+      var cap = '<div class="cap"><b>' + esc(p.ket) + "</b>" + esc(tgl(p.tanggal)) + " • " + rp(p.jumlah) + "</div>";
+      var img = p.bukti
+        ? '<a href="' + esc(p.bukti) + '" target="_blank" rel="noopener"><img src="' + esc(p.bukti) + '" alt="Bukti: ' + esc(p.ket) + '" loading="lazy"></a>'
+        : '<div class="tanpa">Belum ada bukti</div>';
+      return '<div class="bukti-item">' + img + cap + "</div>";
+    }).join("");
+  }
+
+  var btns = document.querySelectorAll(".tab-btn");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) {
+        var on = x === b;
+        x.setAttribute("aria-selected", on ? "true" : "false");
+        document.getElementById("panel-" + x.getAttribute("data-tab")).hidden = !on;
+      });
+    });
+  });
 })();
 
 // Tempel link Google Form di antara tanda kutip. Kalau kosong, tombol disembunyikan.
