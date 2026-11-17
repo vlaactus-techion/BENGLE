@@ -35,7 +35,7 @@ footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
 <div class="header">
 <h1>PERUM TAMAN BENGLE INDAH 1</h1>
 <p>Aman • Bersih • Guyub • Transparan</p>
-<p>📍 Bekasi | ✉️ mayasalsabila17@gmail.com</p>
+<p>📍 Bengle, Majalaya, Karawang | ✉️ mayasalsabila17@gmail.com</p>
 </div>
 
 <div class="card">
@@ -93,17 +93,19 @@ footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
 </form>
 </div>
 
-<footer>© 2026 Perum Taman Bengle Indah 1, Bekasi</footer>
+<footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
 
 </div>
 
 <script>
+var EMAIL_PENGURUS = ["mayasalsabila17@gmail.com", "anung@bengle.dpdns.org"];
+
 document.getElementById("form-warga").addEventListener("submit", function (e) {
   e.preventDefault();
   var f = e.target;
   var subjek = "[Warga] " + f.jenis.value + " - " + f.rumah.value;
   var isi = "Nama: " + f.nama.value + "\nRumah: " + f.rumah.value + "\nKeperluan: " + f.jenis.value + "\n\n" + f.pesan.value;
-  window.location.href = "mailto:mayasalsabila17@gmail.com?subject=" + encodeURIComponent(subjek) + "&body=" + encodeURIComponent(isi);
+  window.location.href = "mailto:" + EMAIL_PENGURUS.join(",") + "?subject=" + encodeURIComponent(subjek) + "&body=" + encodeURIComponent(isi);
 });
 </script>
 </body>
