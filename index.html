@@ -83,53 +83,6 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <p><b>Scan dengan aplikasi bank atau e-wallet</b><br>Setelah membayar, isi form konfirmasi pembayaran.</p>
 <a class="btn btn-blue" id="btn-gform" href="#" target="_blank" rel="noopener" style="display:none">Isi form konfirmasi pembayaran</a>
 </div>
-</div>
-
-<div class="card" id="lapor">
-<h2>Laporan dan konfirmasi</h2>
-<form id="form-warga">
-<label for="nama">Nama</label>
-<input id="nama" name="nama" required autocomplete="name">
-
-<label for="rumah">Blok dan nomor rumah</label>
-<input id="rumah" name="rumah" required placeholder="Contoh: B2 No. 5">
-
-<label for="jenis">Keperluan</label>
-<select id="jenis" name="jenis">
-<option>Konfirmasi pembayaran iuran</option>
-<option>Laporan keamanan</option>
-<option>Laporan kebersihan</option>
-<option>Saran untuk pengurus</option>
-</select>
-
-<div id="blok-bayar">
-<label for="nominal">Nominal yang dibayar (Rp)</label>
-<input id="nominal" name="nominal" type="number" inputmode="numeric" min="0" placeholder="Contoh: 50000">
-
-<label>Pembayaran untuk bulan</label>
-<div class="bulan-grid">
-<label><input type="checkbox" name="bulan" value="Jan"> Jan</label>
-<label><input type="checkbox" name="bulan" value="Feb"> Feb</label>
-<label><input type="checkbox" name="bulan" value="Mar"> Mar</label>
-<label><input type="checkbox" name="bulan" value="Apr"> Apr</label>
-<label><input type="checkbox" name="bulan" value="Mei"> Mei</label>
-<label><input type="checkbox" name="bulan" value="Jun"> Jun</label>
-<label><input type="checkbox" name="bulan" value="Jul"> Jul</label>
-<label><input type="checkbox" name="bulan" value="Agu"> Agu</label>
-<label><input type="checkbox" name="bulan" value="Sep"> Sep</label>
-<label><input type="checkbox" name="bulan" value="Okt"> Okt</label>
-<label><input type="checkbox" name="bulan" value="Nov"> Nov</label>
-<label><input type="checkbox" name="bulan" value="Des"> Des</label>
-</div>
-</div>
-
-<label for="pesan">Pesan (opsional untuk konfirmasi)</label>
-<textarea id="pesan" name="pesan" required></textarea>
-
-<button class="btn btn-blue" type="submit">Kirim lewat email</button>
-<p class="catatan">Tombol ini membuka aplikasi email di HP dengan pesan yang sudah terisi.</p>
-</form>
-</div>
 
 <footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
 
