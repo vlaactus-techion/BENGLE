@@ -27,6 +27,14 @@ label{display:block;margin:12px 0 4px;font-weight:bold;font-size:14px}
 input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:16px;font-family:inherit;box-sizing:border-box}
 textarea{min-height:100px}
 footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
+.scroll{overflow:auto;max-height:70vh;-webkit-overflow-scrolling:touch}
+table.iuran{min-width:760px;font-size:13px}
+table.iuran th,table.iuran td{text-align:center;padding:6px 4px}
+table.iuran th:first-child,table.iuran td:first-child{text-align:left;position:sticky;left:0;min-width:120px;background:#fff;z-index:1;padding-left:8px}
+table.iuran th:first-child{background:#0b6b3a;z-index:3}
+table.iuran th{position:sticky;top:0;z-index:2}
+.ok{color:#0b6b3a;font-weight:bold;font-size:16px}
+.belum{color:#c0392b;font-size:16px}
 </style>
 </head>
 <body>
@@ -42,20 +50,23 @@ footer{text-align:center;font-size:13px;color:#555;padding:10px 15px 30px}
 <h2>Selamat datang, warga</h2>
 <p>Halaman ini untuk melihat laporan kas, membayar iuran, dan menyampaikan laporan atau saran ke pengurus.</p>
 <a class="btn btn-blue" href="#kas">Lihat laporan kas</a>
+<a class="btn btn-blue" href="#status">Cek status iuran bulanan</a>
 <a class="btn btn-blue" href="#bayar">Bayar iuran lewat QRIS</a>
 <a class="btn btn-blue" href="#lapor">Kirim laporan atau konfirmasi</a>
 </div>
 
 <div class="card" id="kas">
 <h2>Laporan kas</h2>
-<table>
-<tr><th>Bulan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>
-<!-- GANTI baris di bawah dengan data kas yang sebenarnya -->
-<tr><td>Agustus 2026</td><td class="angka">Rp 3.000.000</td><td class="angka">Rp 2.400.000</td><td class="angka">Rp 600.000</td></tr>
-<tr><td>September 2026</td><td class="angka">Rp 3.200.000</td><td class="angka">Rp 2.700.000</td><td class="angka">Rp 1.100.000</td></tr>
-<tr><td>Oktober 2026</td><td class="angka">Rp 3.100.000</td><td class="angka">Rp 2.500.000</td><td class="angka">Rp 1.700.000</td></tr>
-</table>
-<p class="catatan">Data contoh. Ganti dengan data kas asli sebelum dibagikan ke warga.</p>
+<table id="tabel-kas"></table>
+<p class="catatan">Pemasukan dihitung otomatis dari warga yang sudah bayar di tabel status iuran.</p>
+</div>
+
+<div class="card" id="status">
+<h2>Status iuran bulanan</h2>
+<div class="scroll">
+<table class="iuran" id="tabel-iuran"></table>
+</div>
+<p class="catatan">✔ = sudah bayar, ✘ = belum bayar. Geser tabel ke kanan/bawah untuk melihat bulan dan warga lainnya.</p>
 </div>
 
 <div class="card" id="bayar">
@@ -108,6 +119,96 @@ document.getElementById("form-warga").addEventListener("submit", function (e) {
   var isi = "Nama: " + f.nama.value + "\nRumah: " + f.rumah.value + "\nKeperluan: " + f.jenis.value + "\n\n" + f.pesan.value;
   window.location.href = "mailto:" + EMAIL_PENGURUS.join(",") + "?subject=" + encodeURIComponent(subjek) + "&body=" + encodeURIComponent(isi);
 });
+
+// ===== DATA IURAN BULANAN =====
+// 50 baris warga. GANTI "Warga 1" dst dengan nama asli, dan isi "bayar" dengan nomor bulan yang sudah lunas (1=Jan ... 12=Des).
+var TAHUN = 2026;
+var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+var IURAN = 50000; // iuran per warga per bulan (Rp)
+var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
+var WARGA = [
+  {nama: "Warga 1", bayar: []},
+  {nama: "Warga 2", bayar: []},
+  {nama: "Warga 3", bayar: []},
+  {nama: "Warga 4", bayar: []},
+  {nama: "Warga 5", bayar: []},
+  {nama: "Warga 6", bayar: []},
+  {nama: "Warga 7", bayar: []},
+  {nama: "Warga 8", bayar: []},
+  {nama: "Warga 9", bayar: []},
+  {nama: "Warga 10", bayar: []},
+  {nama: "Warga 11", bayar: []},
+  {nama: "Warga 12", bayar: []},
+  {nama: "Warga 13", bayar: []},
+  {nama: "Warga 14", bayar: []},
+  {nama: "Warga 15", bayar: []},
+  {nama: "Warga 16", bayar: []},
+  {nama: "Warga 17", bayar: []},
+  {nama: "Warga 18", bayar: []},
+  {nama: "Warga 19", bayar: []},
+  {nama: "Warga 20", bayar: []},
+  {nama: "Warga 21", bayar: []},
+  {nama: "Warga 22", bayar: []},
+  {nama: "Warga 23", bayar: []},
+  {nama: "Warga 24", bayar: []},
+  {nama: "Warga 25", bayar: []},
+  {nama: "Warga 26", bayar: []},
+  {nama: "Warga 27", bayar: []},
+  {nama: "Warga 28", bayar: []},
+  {nama: "Warga 29", bayar: []},
+  {nama: "Warga 30", bayar: []},
+  {nama: "Warga 31", bayar: []},
+  {nama: "Warga 32", bayar: []},
+  {nama: "Warga 33", bayar: []},
+  {nama: "Warga 34", bayar: []},
+  {nama: "Warga 35", bayar: []},
+  {nama: "Warga 36", bayar: []},
+  {nama: "Warga 37", bayar: []},
+  {nama: "Warga 38", bayar: []},
+  {nama: "Warga 39", bayar: []},
+  {nama: "Warga 40", bayar: []},
+  {nama: "Warga 41", bayar: []},
+  {nama: "Warga 42", bayar: []},
+  {nama: "Warga 43", bayar: []},
+  {nama: "Warga 44", bayar: []},
+  {nama: "Warga 45", bayar: []},
+  {nama: "Warga 46", bayar: []},
+  {nama: "Warga 47", bayar: []},
+  {nama: "Warga 48", bayar: []},
+  {nama: "Warga 49", bayar: []},
+  {nama: "Warga 50", bayar: []}
+];
+
+(function () {
+  var t = document.getElementById("tabel-iuran");
+  var h = "<tr><th>Nama</th>";
+  BULAN.forEach(function (b) { h += "<th>" + b + "</th>"; });
+  h += "</tr>";
+  WARGA.forEach(function (w) {
+    h += "<tr><td>" + w.nama + "</td>";
+    for (var i = 1; i <= 12; i++) {
+      h += w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>';
+    }
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+})();
+
+(function () {
+  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
+  var h = '<tr><th>Bulan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>';
+  var saldo = 0;
+  for (var i = 1; i <= 12; i++) {
+    var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
+    var masuk = jumlah * IURAN;
+    var keluar = KELUAR[i - 1] || 0;
+    saldo += masuk - keluar;
+    h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
+         "</td><td class=\"angka\">" + rp(keluar) + "</td><td class=\"angka\">" + rp(saldo) + "</td></tr>";
+  }
+  document.getElementById("tabel-kas").innerHTML = h;
+})();
 </script>
 </body>
 </html>
+
