@@ -147,7 +147,7 @@ table.iuran th{position:sticky;top:0;z-index:2}
 // 48 baris warga (satu per rumah: Nama (Blok/No rumah)). Isi "bayar" dengan nomor bulan yang sudah lunas (1=Jan ... 12=Des).
 var TAHUN = 2026;
 var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-var IURAN = 50000; // iuran per warga per bulan (Rp)
+var IURAN = 50000; // iuran per warga per bulan (Rp); tambah iuran: 25000 pada warga yang iurannya berbeda
 var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
 // ===== DATA PENGELUARAN =====
 // Tambah satu baris per pengeluaran. tanggal format "TTTT-BB-HH". bukti = nama file foto/nota (mis. "bukti/nota-1.jpg") atau link gambar; kosongkan jika belum ada.
@@ -176,7 +176,7 @@ var WARGA = [
   {nama: "Alm. Munu / Nurhasanah (A2/9)", bayar: []},
   {nama: "Al Mukhlas Fileri (A2/10)", bayar: []},
   {nama: "Dadang Sutisna (A2/11)", bayar: []},
-  {nama: "Anggit Setiawan (A2/12)", bayar: []},
+  {nama: "Anggit Setiawan - petugas kebersihan (A2/12)", iuran: 25000, bayar: []},
   {nama: "Sutrisno (A2/12A)", bayar: []},
   {nama: "Di kontrakkan (A3/2)", bayar: []},
   {nama: "Nurrohman (A3/3)", bayar: []},
@@ -226,7 +226,7 @@ var WARGA = [
   var saldo = 0;
   for (var i = 1; i <= 12; i++) {
     var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
-    var masuk = jumlah * IURAN;
+    var masuk = WARGA.reduce(function (a, w) { return w.bayar.indexOf(i) > -1 ? a + (w.iuran || IURAN) : a; }, 0);
     var keluar = (KELUAR[i - 1] || 0) + PENGELUARAN.reduce(function (a, p) { return parseInt(p.tanggal.slice(5, 7), 10) === i ? a + p.jumlah : a; }, 0);
     saldo += masuk - keluar;
     h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
@@ -282,8 +282,8 @@ var WARGA = [
 
 // ===== LINK LAPORAN & ADUAN =====
 // Tempel link di antara tanda kutip (Google Drive: Bagikan > "Siapa saja yang memiliki link"; Google Form untuk aduan). Kalau kosong, tombol tampil abu-abu "belum tersedia".
-var LAPORAN_BULANAN_URL = "https://drive.google.com/file/d/1yugg_pKwd7C5-5WinvzxKST_1OOgHXT2/view?usp=drivesdk";
-var LAPORAN_TAHUNAN_URL = "https://drive.google.com/file/d/1AMZwLWzKYnscmZxXS64oKbmq6A5-uTX8/view?usp=drivesdk";
+var LAPORAN_BULANAN_URL = "https://drive.google.com/file/d/1WVttkW9zcxwEMkh0Ocsgh_uDJ5PAUOmU/view?usp=drivesdk";
+var LAPORAN_TAHUNAN_URL = "https://drive.google.com/file/d/1l80B-F6E4yVdDn-CxrOAFmAhopjBmdjy/view?usp=drivesdk";
 var FORM_ADUAN_URL = ""; // opsional: kalau diisi, muncul tombol Google Form di bawah form aduan
 var EMAIL_ADUAN = "mayasalsabila17@gmail.com,anung@gmail.com"; // tujuan form aduan (pisahkan dengan koma)
 (function () {
@@ -304,161 +304,6 @@ var EMAIL_ADUAN = "mayasalsabila17@gmail.com,anung@gmail.com"; // tujuan form ad
     b.classList.remove("btn-off");
     var s = b.querySelector("small");
     if (s) s.remove();
-  });
-})();
-
-// Tempel link Google Form di antara tanda kutip. Kalau kosong, tombol disembunyikan.
-var GFORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSds4PLeb_FeW4tgsCmpqu6o68jai5PxPZziY_D1Vlh5wpxX8w/viewform";
-(function () {
-  var b = document.getElementById("btn-gform");
-  if (GFORM_URL) { b.href = GFORM_URL; b.style.display = "block"; }
-})();
-</script>
-</body>
-</html>
-
-
-<footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
-
-</div>
-
-<script>
-// ===== DATA IURAN BULANAN =====
-// 50 baris warga. GANTI "Warga 1" dst dengan nama asli, dan isi "bayar" dengan nomor bulan yang sudah lunas (1=Jan ... 12=Des).
-var TAHUN = 2026;
-var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-var IURAN = 50000; // iuran per warga per bulan (Rp)
-var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
-// ===== DATA PENGELUARAN =====
-// Tambah satu baris per pengeluaran. tanggal format "TTTT-BB-HH". bukti = nama file foto/nota (mis. "bukti/nota-1.jpg") atau link gambar; kosongkan jika belum ada.
-var PENGELUARAN = [
-  // {tanggal: "2026-11-05", ket: "Gaji petugas kebersihan", jumlah: 300000, bukti: "bukti/nota-1.jpg"},
-];
-var WARGA = [
-  {nama: "Warga 1", bayar: []},
-  {nama: "Warga 2", bayar: []},
-  {nama: "Warga 3", bayar: []},
-  {nama: "Warga 4", bayar: []},
-  {nama: "Warga 5", bayar: []},
-  {nama: "Warga 6", bayar: []},
-  {nama: "Warga 7", bayar: []},
-  {nama: "Warga 8", bayar: []},
-  {nama: "Warga 9", bayar: []},
-  {nama: "Warga 10", bayar: []},
-  {nama: "Warga 11", bayar: []},
-  {nama: "Warga 12", bayar: []},
-  {nama: "Warga 13", bayar: []},
-  {nama: "Warga 14", bayar: []},
-  {nama: "Warga 15", bayar: []},
-  {nama: "Warga 16", bayar: []},
-  {nama: "Warga 17", bayar: []},
-  {nama: "Warga 18", bayar: []},
-  {nama: "Warga 19", bayar: []},
-  {nama: "Warga 20", bayar: []},
-  {nama: "Warga 21", bayar: []},
-  {nama: "Warga 22", bayar: []},
-  {nama: "Warga 23", bayar: []},
-  {nama: "Warga 24", bayar: []},
-  {nama: "Warga 25", bayar: []},
-  {nama: "Warga 26", bayar: []},
-  {nama: "Warga 27", bayar: []},
-  {nama: "Warga 28", bayar: []},
-  {nama: "Warga 29", bayar: []},
-  {nama: "Warga 30", bayar: []},
-  {nama: "Warga 31", bayar: []},
-  {nama: "Warga 32", bayar: []},
-  {nama: "Warga 33", bayar: []},
-  {nama: "Warga 34", bayar: []},
-  {nama: "Warga 35", bayar: []},
-  {nama: "Warga 36", bayar: []},
-  {nama: "Warga 37", bayar: []},
-  {nama: "Warga 38", bayar: []},
-  {nama: "Warga 39", bayar: []},
-  {nama: "Warga 40", bayar: []},
-  {nama: "Warga 41", bayar: []},
-  {nama: "Warga 42", bayar: []},
-  {nama: "Warga 43", bayar: []},
-  {nama: "Warga 44", bayar: []},
-  {nama: "Warga 45", bayar: []},
-  {nama: "Warga 46", bayar: []},
-  {nama: "Warga 47", bayar: []},
-  {nama: "Warga 48", bayar: []},
-  {nama: "Warga 49", bayar: []},
-  {nama: "Warga 50", bayar: []}
-];
-
-(function () {
-  var t = document.getElementById("tabel-iuran");
-  var h = "<tr><th>Nama</th>";
-  BULAN.forEach(function (b) { h += "<th>" + b + "</th>"; });
-  h += "</tr>";
-  WARGA.forEach(function (w) {
-    h += "<tr><td>" + w.nama + "</td>";
-    for (var i = 1; i <= 12; i++) {
-      h += w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>';
-    }
-    h += "</tr>";
-  });
-  t.innerHTML = h;
-})();
-
-(function () {
-  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
-  var h = '<tr><th>Bulan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>';
-  var saldo = 0;
-  for (var i = 1; i <= 12; i++) {
-    var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
-    var masuk = jumlah * IURAN;
-    var keluar = (KELUAR[i - 1] || 0) + PENGELUARAN.reduce(function (a, p) { return parseInt(p.tanggal.slice(5, 7), 10) === i ? a + p.jumlah : a; }, 0);
-    saldo += masuk - keluar;
-    h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
-         "</td><td class=\"angka\">" + rp(keluar) + "</td><td class=\"angka\">" + rp(saldo) + "</td></tr>";
-  }
-  document.getElementById("tabel-kas").innerHTML = h;
-})();
-
-(function () {
-  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
-  function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]; }); }
-  function tgl(x) { var q = x.split("-"); return parseInt(q[2], 10) + " " + BULAN[parseInt(q[1], 10) - 1] + " " + q[0]; }
-  var data = PENGELUARAN.slice().sort(function (a, b) { return a.tanggal < b.tanggal ? -1 : 1; });
-
-  var t = document.getElementById("tabel-pengeluaran");
-  if (!data.length) {
-    t.outerHTML = '<div class="kosong-info">Belum ada pengeluaran tercatat.</div>';
-  } else {
-    var total = 0;
-    var h = '<tr><th>Tanggal</th><th>Keterangan</th><th class="angka">Jumlah</th></tr>';
-    data.forEach(function (p) {
-      total += p.jumlah;
-      h += "<tr><td>" + esc(tgl(p.tanggal)) + "</td><td>" + esc(p.ket) + '</td><td class="angka">' + rp(p.jumlah) + "</td></tr>";
-    });
-    h += '<tr class="total"><td colspan="2">Total</td><td class="angka">' + rp(total) + "</td></tr>";
-    t.innerHTML = h;
-  }
-
-  var g = document.getElementById("grid-bukti");
-  if (!data.length) {
-    g.outerHTML = '<div class="kosong-info">Belum ada bukti pengeluaran.</div>';
-  } else {
-    g.innerHTML = data.map(function (p) {
-      var cap = '<div class="cap"><b>' + esc(p.ket) + "</b>" + esc(tgl(p.tanggal)) + " • " + rp(p.jumlah) + "</div>";
-      var img = p.bukti
-        ? '<a href="' + esc(p.bukti) + '" target="_blank" rel="noopener"><img src="' + esc(p.bukti) + '" alt="Bukti: ' + esc(p.ket) + '" loading="lazy"></a>'
-        : '<div class="tanpa">Belum ada bukti</div>';
-      return '<div class="bukti-item">' + img + cap + "</div>";
-    }).join("");
-  }
-
-  var btns = document.querySelectorAll(".tab-btn");
-  btns.forEach(function (b) {
-    b.addEventListener("click", function () {
-      btns.forEach(function (x) {
-        var on = x === b;
-        x.setAttribute("aria-selected", on ? "true" : "false");
-        document.getElementById("panel-" + x.getAttribute("data-tab")).hidden = !on;
-      });
-    });
   });
 })();
 
