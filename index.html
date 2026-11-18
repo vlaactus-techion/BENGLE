@@ -28,6 +28,13 @@ td.angka,th.angka{text-align:right}
 .tab-btn[aria-selected="true"]{background:#0b6b3a;color:#fff}
 .tab-btn:focus-visible{outline:3px solid #f5b301;outline-offset:2px}
 .panel[hidden]{display:none}
+.btn-gold{background:#b07d00}
+.fa label{display:block;font-weight:bold;font-size:14px;margin:10px 0 4px}
+.fa input,.fa select,.fa textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #bbb;border-radius:8px;font:inherit;font-size:15px;background:#fff}
+.fa textarea{min-height:110px;resize:vertical}
+.fa .hint{font-size:12px;color:#666;margin:4px 0 0}
+.btn-off{background:#9aa5a0;cursor:not-allowed;pointer-events:none}
+.unduh small{display:block;font-weight:normal;font-size:12px;opacity:.9}
 .kosong-info{padding:20px 10px;text-align:center;color:#666;border:2px dashed #ccc;border-radius:8px;font-size:14px}
 .bukti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bukti-item{border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fafafa}
@@ -64,6 +71,7 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <a class="btn btn-blue" href="#pengeluaran">Lihat laporan pengeluaran</a>
 <a class="btn btn-blue" href="#status">Cek status iuran bulanan</a>
 <a class="btn btn-blue" href="#bayar">Bayar iuran lewat QRIS</a>
+<a class="btn btn-blue" href="#laporan">Unduh laporan kas &amp; kirim aduan</a>
 </div>
 
 <div class="card" id="kas">
@@ -96,6 +104,28 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <p class="catatan">✔ = sudah bayar, ✘ = belum bayar. Geser tabel ke kanan/bawah untuk melihat bulan dan warga lainnya.</p>
 </div>
 
+<div class="card" id="laporan">
+<h2>Unduh laporan &amp; aduan</h2>
+<p><b>Laporan kas keuangan</b><br>Unduh untuk melihat pemasukan dan pengeluaran kas warga.</p>
+<a class="btn btn-blue unduh btn-off" id="btn-lap-bulanan" href="#" target="_blank" rel="noopener" >⬇ Laporan kas bulanan<small>belum tersedia</small></a>
+<a class="btn btn-blue unduh btn-off" id="btn-lap-tahunan" href="#" target="_blank" rel="noopener" >⬇ Laporan kas tahunan<small>belum tersedia</small></a>
+<hr style="border:0;border-top:1px solid #ddd;margin:16px 0">
+<p><b>Aduan atau saran</b><br>Punya keluhan atau masukan untuk lingkungan? Isi formulir berikut.</p>
+<form class="fa" id="form-aduan">
+<label for="fa-nama">Nama (boleh dikosongkan)</label>
+<input id="fa-nama" name="nama" autocomplete="name">
+<label for="fa-rumah">Blok / No. rumah</label>
+<input id="fa-rumah" name="rumah" placeholder="contoh: A2/5">
+<label for="fa-jenis">Jenis</label>
+<select id="fa-jenis" name="jenis"><option>Aduan</option><option>Saran</option></select>
+<label for="fa-isi">Isi aduan / saran</label>
+<textarea id="fa-isi" name="isi" required></textarea>
+<button type="submit" class="btn btn-gold">✉ Kirim ke pengurus</button>
+<p class="hint" id="fa-hint">Tombol kirim membuka aplikasi email dengan isi yang sudah terisi, tinggal tekan Kirim.</p>
+</form>
+<a class="btn btn-blue" id="btn-aduan" href="#" target="_blank" rel="noopener" style="display:none">Atau isi lewat Google Form</a>
+</div>
+
 <div class="card" id="bayar">
 <h2>Bayar iuran</h2>
 <p><b>Iuran kebersihan:</b> uang sampah 50k/bulan.</p>
@@ -107,6 +137,186 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <a class="btn btn-blue" id="btn-gform" href="#" target="_blank" rel="noopener" style="display:none">Isi form konfirmasi pembayaran</a>
 </div>
 </div>
+
+<footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
+
+</div>
+
+<script>
+// ===== DATA IURAN BULANAN =====
+// 48 baris warga (satu per rumah: Nama (Blok/No rumah)). Isi "bayar" dengan nomor bulan yang sudah lunas (1=Jan ... 12=Des).
+var TAHUN = 2026;
+var BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+var IURAN = 50000; // iuran per warga per bulan (Rp)
+var KELUAR = [0,0,0,0,0,0,0,0,0,0,0,0]; // pengeluaran tiap bulan, Jan sampai Des (Rp)
+// ===== DATA PENGELUARAN =====
+// Tambah satu baris per pengeluaran. tanggal format "TTTT-BB-HH". bukti = nama file foto/nota (mis. "bukti/nota-1.jpg") atau link gambar; kosongkan jika belum ada.
+var PENGELUARAN = [
+  // {tanggal: "2026-11-05", ket: "Gaji petugas kebersihan", jumlah: 300000, bukti: "bukti/nota-1.jpg"},
+];
+var WARGA = [
+  {nama: "Di kontrakkan (A1/2)", bayar: []},
+  {nama: "Ares Santiko (A1/3)", bayar: []},
+  {nama: "Fajar Hidayat (A1/5)", bayar: []},
+  {nama: "Di kontrakkan (A1/6)", bayar: []},
+  {nama: "Suparrin (A1/7)", bayar: []},
+  {nama: "Sigit Waluyo (A1/8)", bayar: []},
+  {nama: "Muhammad Ikhsan (A1/9)", bayar: []},
+  {nama: "Farhan Maulana (A2/1A)", bayar: []},
+  {nama: "Asep Adi Sofyan (A2/1B)", bayar: []},
+  {nama: "Asep Adi Sofyan (A2/1C)", bayar: []},
+  {nama: "Maulana Ayustian (A2/10)", bayar: []},
+  {nama: "Adimas Nugroho (A2/1F)", bayar: []},
+  {nama: "Hadi Hidayat Mu'alif (A2/1)", bayar: []},
+  {nama: "Muhammad Muraini (A2/2)", bayar: []},
+  {nama: "Harman Adi Wibowo (A2/3)", bayar: []},
+  {nama: "Ade Kristiawan Ambar Saputro (A2/5)", bayar: []},
+  {nama: "Ardiyanto (A2/6)", bayar: []},
+  {nama: "Andari Hendriyana (A2/7)", bayar: []},
+  {nama: "Alm. Munu / Nurhasanah (A2/9)", bayar: []},
+  {nama: "Al Mukhlas Fileri (A2/10)", bayar: []},
+  {nama: "Dadang Sutisna (A2/11)", bayar: []},
+  {nama: "Anggit Setiawan (A2/12)", bayar: []},
+  {nama: "Sutrisno (A2/12A)", bayar: []},
+  {nama: "Di kontrakkan (A3/2)", bayar: []},
+  {nama: "Nurrohman (A3/3)", bayar: []},
+  {nama: "Agus Fajar Setiawan (A3/4)", bayar: []},
+  {nama: "Eko Prasetyo (A3/5)", bayar: []},
+  {nama: "Wahyu Wijanarko (A3/6)", bayar: []},
+  {nama: "Di kontrakkan (A3/7)", bayar: []},
+  {nama: "Sukirman (A3/8)", bayar: []},
+  {nama: "Manang Supriadi (A3/9)", bayar: []},
+  {nama: "Rusmana (A3/10)", bayar: []},
+  {nama: "Anhari Masagi (A3/11)", bayar: []},
+  {nama: "Agung Wahono (A3/12A)", bayar: []},
+  {nama: "Juanda (A3/15)", bayar: []},
+  {nama: "Dasuki (A3/16)", bayar: []},
+  {nama: "Fendriatna (A3/17)", bayar: []},
+  {nama: "Fendriatna (A3/18)", bayar: []},
+  {nama: "Dayo (A3/19)", bayar: []},
+  {nama: "Santa (A3/21)", bayar: []},
+  {nama: "Deni (A3/22)", bayar: []},
+  {nama: "M. Anton Mudin (B1/2)", bayar: []},
+  {nama: "Rohmat Ardi Kurniawan (B1/3)", bayar: []},
+  {nama: "Maryoto (B2/3)", bayar: []},
+  {nama: "Yeyet (B2/4)", bayar: []},
+  {nama: "Dinun Pasaribu (B2/6)", bayar: []},
+  {nama: "Sudrajat (B2/7)", bayar: []},
+  {nama: "Yang Mulyana (B2/12)", bayar: []}
+];
+
+(function () {
+  var t = document.getElementById("tabel-iuran");
+  var h = "<tr><th>Nama</th>";
+  BULAN.forEach(function (b) { h += "<th>" + b + "</th>"; });
+  h += "</tr>";
+  WARGA.forEach(function (w) {
+    h += "<tr><td>" + w.nama + "</td>";
+    for (var i = 1; i <= 12; i++) {
+      h += w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>';
+    }
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+})();
+
+(function () {
+  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
+  var h = '<tr><th>Bulan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>';
+  var saldo = 0;
+  for (var i = 1; i <= 12; i++) {
+    var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
+    var masuk = jumlah * IURAN;
+    var keluar = (KELUAR[i - 1] || 0) + PENGELUARAN.reduce(function (a, p) { return parseInt(p.tanggal.slice(5, 7), 10) === i ? a + p.jumlah : a; }, 0);
+    saldo += masuk - keluar;
+    h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
+         "</td><td class=\"angka\">" + rp(keluar) + "</td><td class=\"angka\">" + rp(saldo) + "</td></tr>";
+  }
+  document.getElementById("tabel-kas").innerHTML = h;
+})();
+
+(function () {
+  function rp(n) { return "Rp " + n.toLocaleString("id-ID"); }
+  function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]; }); }
+  function tgl(x) { var q = x.split("-"); return parseInt(q[2], 10) + " " + BULAN[parseInt(q[1], 10) - 1] + " " + q[0]; }
+  var data = PENGELUARAN.slice().sort(function (a, b) { return a.tanggal < b.tanggal ? -1 : 1; });
+
+  var t = document.getElementById("tabel-pengeluaran");
+  if (!data.length) {
+    t.outerHTML = '<div class="kosong-info">Belum ada pengeluaran tercatat.</div>';
+  } else {
+    var total = 0;
+    var h = '<tr><th>Tanggal</th><th>Keterangan</th><th class="angka">Jumlah</th></tr>';
+    data.forEach(function (p) {
+      total += p.jumlah;
+      h += "<tr><td>" + esc(tgl(p.tanggal)) + "</td><td>" + esc(p.ket) + '</td><td class="angka">' + rp(p.jumlah) + "</td></tr>";
+    });
+    h += '<tr class="total"><td colspan="2">Total</td><td class="angka">' + rp(total) + "</td></tr>";
+    t.innerHTML = h;
+  }
+
+  var g = document.getElementById("grid-bukti");
+  if (!data.length) {
+    g.outerHTML = '<div class="kosong-info">Belum ada bukti pengeluaran.</div>';
+  } else {
+    g.innerHTML = data.map(function (p) {
+      var cap = '<div class="cap"><b>' + esc(p.ket) + "</b>" + esc(tgl(p.tanggal)) + " • " + rp(p.jumlah) + "</div>";
+      var img = p.bukti
+        ? '<a href="' + esc(p.bukti) + '" target="_blank" rel="noopener"><img src="' + esc(p.bukti) + '" alt="Bukti: ' + esc(p.ket) + '" loading="lazy"></a>'
+        : '<div class="tanpa">Belum ada bukti</div>';
+      return '<div class="bukti-item">' + img + cap + "</div>";
+    }).join("");
+  }
+
+  var btns = document.querySelectorAll(".tab-btn");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) {
+        var on = x === b;
+        x.setAttribute("aria-selected", on ? "true" : "false");
+        document.getElementById("panel-" + x.getAttribute("data-tab")).hidden = !on;
+      });
+    });
+  });
+})();
+
+// ===== LINK LAPORAN & ADUAN =====
+// Tempel link di antara tanda kutip (Google Drive: Bagikan > "Siapa saja yang memiliki link"; Google Form untuk aduan). Kalau kosong, tombol tampil abu-abu "belum tersedia".
+var LAPORAN_BULANAN_URL = "https://drive.google.com/file/d/1yugg_pKwd7C5-5WinvzxKST_1OOgHXT2/view?usp=drivesdk";
+var LAPORAN_TAHUNAN_URL = "https://drive.google.com/file/d/1AMZwLWzKYnscmZxXS64oKbmq6A5-uTX8/view?usp=drivesdk";
+var FORM_ADUAN_URL = ""; // opsional: kalau diisi, muncul tombol Google Form di bawah form aduan
+var EMAIL_ADUAN = "mayasalsabila17@gmail.com,anung@gmail.com"; // tujuan form aduan (pisahkan dengan koma)
+(function () {
+  var b = document.getElementById("btn-aduan");
+  if (FORM_ADUAN_URL) { b.href = FORM_ADUAN_URL; b.style.display = "block"; }
+  document.getElementById("form-aduan").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = e.target;
+    var body = "Jenis: " + f.jenis.value + "\nNama: " + (f.nama.value || "(tanpa nama)") + "\nBlok/No rumah: " + (f.rumah.value || "-") + "\n\n" + f.isi.value;
+    window.location.href = "mailto:" + EMAIL_ADUAN + "?subject=" + encodeURIComponent(f.jenis.value + " warga Perum Taman Bengle Indah 1") + "&body=" + encodeURIComponent(body);
+  });
+})();
+(function () {
+  [["btn-lap-bulanan", LAPORAN_BULANAN_URL], ["btn-lap-tahunan", LAPORAN_TAHUNAN_URL]].forEach(function (x) {
+    var b = document.getElementById(x[0]);
+    if (!x[1]) return;
+    b.href = x[1];
+    b.classList.remove("btn-off");
+    var s = b.querySelector("small");
+    if (s) s.remove();
+  });
+})();
+
+// Tempel link Google Form di antara tanda kutip. Kalau kosong, tombol disembunyikan.
+var GFORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSds4PLeb_FeW4tgsCmpqu6o68jai5PxPZziY_D1Vlh5wpxX8w/viewform";
+(function () {
+  var b = document.getElementById("btn-gform");
+  if (GFORM_URL) { b.href = GFORM_URL; b.style.display = "block"; }
+})();
+</script>
+</body>
+</html>
+
 
 <footer>© 2026 Perum Taman Bengle Indah 1, Bengle, Majalaya, Karawang</footer>
 
