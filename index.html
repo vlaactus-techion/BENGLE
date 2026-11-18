@@ -101,7 +101,7 @@ table.iuran th{position:sticky;top:0;z-index:2}
 <div class="scroll">
 <table class="iuran" id="tabel-iuran"></table>
 </div>
-<p class="catatan">✔ = sudah bayar, ✘ = belum bayar. Geser tabel ke kanan/bawah untuk melihat bulan dan warga lainnya.</p>
+<p class="catatan">✔ = sudah bayar, ✘ = belum bayar, – = bebas iuran (Ketua RT). Geser tabel ke kanan/bawah untuk melihat bulan dan warga lainnya.</p>
 </div>
 
 <div class="card" id="laporan">
@@ -159,7 +159,7 @@ var WARGA = [
   {nama: "Ares Santiko (A1/3)", bayar: []},
   {nama: "Fajar Hidayat (A1/5)", bayar: []},
   {nama: "Di kontrakkan (A1/6)", bayar: []},
-  {nama: "Suparrin (A1/7)", bayar: []},
+  {nama: "Suparmin - Ketua RT (A1/7)", iuran: 0, bayar: []},
   {nama: "Sigit Waluyo (A1/8)", bayar: []},
   {nama: "Muhammad Ikhsan (A1/9)", bayar: []},
   {nama: "Farhan Maulana (A2/1A)", bayar: []},
@@ -213,7 +213,7 @@ var WARGA = [
   WARGA.forEach(function (w) {
     h += "<tr><td>" + w.nama + "</td>";
     for (var i = 1; i <= 12; i++) {
-      h += w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>';
+      h += w.iuran === 0 ? '<td>–</td>' : (w.bayar.indexOf(i) > -1 ? '<td class="ok">✔</td>' : '<td class="belum">✘</td>');
     }
     h += "</tr>";
   });
@@ -226,7 +226,7 @@ var WARGA = [
   var saldo = 0;
   for (var i = 1; i <= 12; i++) {
     var jumlah = WARGA.filter(function (w) { return w.bayar.indexOf(i) > -1; }).length;
-    var masuk = WARGA.reduce(function (a, w) { return w.bayar.indexOf(i) > -1 ? a + (w.iuran || IURAN) : a; }, 0);
+    var masuk = WARGA.reduce(function (a, w) { return w.bayar.indexOf(i) > -1 ? a + (w.iuran === undefined ? IURAN : w.iuran) : a; }, 0);
     var keluar = (KELUAR[i - 1] || 0) + PENGELUARAN.reduce(function (a, p) { return parseInt(p.tanggal.slice(5, 7), 10) === i ? a + p.jumlah : a; }, 0);
     saldo += masuk - keluar;
     h += "<tr><td>" + BULAN[i - 1] + " " + TAHUN + "</td><td class=\"angka\">" + rp(masuk) +
@@ -282,8 +282,8 @@ var WARGA = [
 
 // ===== LINK LAPORAN & ADUAN =====
 // Tempel link di antara tanda kutip (Google Drive: Bagikan > "Siapa saja yang memiliki link"; Google Form untuk aduan). Kalau kosong, tombol tampil abu-abu "belum tersedia".
-var LAPORAN_BULANAN_URL = "https://drive.google.com/file/d/1WVttkW9zcxwEMkh0Ocsgh_uDJ5PAUOmU/view?usp=drivesdk";
-var LAPORAN_TAHUNAN_URL = "https://drive.google.com/file/d/1l80B-F6E4yVdDn-CxrOAFmAhopjBmdjy/view?usp=drivesdk";
+var LAPORAN_BULANAN_URL = "https://drive.google.com/file/d/1RLo2mnCnqmfNUuvVb85CnIHiTpcLIwnD/view?usp=drivesdk";
+var LAPORAN_TAHUNAN_URL = "https://drive.google.com/file/d/1lbiAE6oPMENIi-Fp6Im8uiX-Nu9Ap_w1/view?usp=drivesdk";
 var FORM_ADUAN_URL = ""; // opsional: kalau diisi, muncul tombol Google Form di bawah form aduan
 var EMAIL_ADUAN = "mayasalsabila17@gmail.com,anung@gmail.com"; // tujuan form aduan (pisahkan dengan koma)
 (function () {
